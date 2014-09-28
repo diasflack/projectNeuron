@@ -9,6 +9,11 @@ define(['underscore'], function(_) {
     Teaching.prototype.init = function(neuron) {
         this.neuron = neuron;
     };
+    
+    //Окончание обучения. Возвращаем обученный нейрон
+    Teaching.prototype.returnNeuron = function() {
+        return this.neuron;
+    };
 
     /*
      * Всякие методы обучения
@@ -17,7 +22,7 @@ define(['underscore'], function(_) {
     //Перераспределение весов по правилу Хебба
     Teaching.prototype.teachingMethodHebb = function() {
         var _self = this;
-        return _.map(this.neuron.weights, function(weight, i){
+        return _.map(_self.neuron.weights, function(weight, i){
             return weight + (_self.learningRate)*(+_self.neuron.activate())*(_self.neuron.inputs[i]);
         });
     };
@@ -26,6 +31,7 @@ define(['underscore'], function(_) {
     Teaching.prototype.teachingMethodDelta = function(expected) {
         var _self = this;
         return _.map(_self.neuron.weights, function(weight, i){
+        	//debugger;
             return weight + (_self.learningRate)*(expected-_self.neuron.activate())*(_self.neuron.inputs[i]);
         });
     };
@@ -33,7 +39,7 @@ define(['underscore'], function(_) {
     //Перераспределение весов по правилу Ойя
     Teaching.prototype.teachingMethodOja = function() {
         var _self = this;
-        return _.map(this.neuron.weights, function(weight, i){
+        return _.map(_self.neuron.weights, function(weight, i){
             return weight + ((_self.learningRate)*(+_self.neuron.activate())) * ((_self.neuron.inputs[i])-(+_self.neuron.activate())*weight);
         });
     };

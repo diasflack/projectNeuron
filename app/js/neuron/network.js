@@ -17,7 +17,8 @@ define(['neuron/neuron'], function(Neuron) {
         for (var layer = 0; layer < this.numberOfLayers; layer++) {
             this.network[layer] = [];
             for (var neuron = 0; neuron < this.numberOfNeurons; neuron++) {
-                this.network[layer][neuron] = new Neuron(inputs, weights);
+                this.network[layer][neuron] = new Neuron();
+                this.network[layer][neuron].init(inputs, weights);
             }
         }
     };
