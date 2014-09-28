@@ -1,9 +1,11 @@
-define(['neuron/neuron'], function(Neuron) {
+define(['neuron/neuron'], function(Neuron) {"use strict";
     //Класс Нейрона
-    function Network() {
+    function Network(inputs, weights) {
         this.network = []; //Массив нейронов
         this.numberOfNeurons = 5; //Количество нейронов в слое
         this.numberOfLayers = 1; //Количество слоев
+        
+        this.createNetwork(inputs, weights);
     }
 
 
@@ -17,8 +19,7 @@ define(['neuron/neuron'], function(Neuron) {
         for (var layer = 0; layer < this.numberOfLayers; layer++) {
             this.network[layer] = [];
             for (var neuron = 0; neuron < this.numberOfNeurons; neuron++) {
-                this.network[layer][neuron] = new Neuron();
-                this.network[layer][neuron].init(inputs, weights);
+                this.network[layer][neuron] = new Neuron(inputs, weights);
             }
         }
     };

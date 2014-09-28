@@ -6,18 +6,15 @@ require(['underscore', 'neuron/neuron', 'neuron/network', 'neuron/teaching'], fu
         var new_inputs;
 
         var inputs = [0,0,0,0];
-        var weights = [1,1,1,1];
+        var weights = [20,20,20,20];
 
-        var net = new Network();
-        
-        net.createNetwork(inputs, weights);
+        var net = new Network(inputs, weights);
 
         //Поучим сеть умножать на два - ну или типа того
 
         for (var layer = 0; layer < net.numberOfLayers; layer++) {
             for (var neuron = 0; neuron < net.numberOfNeurons; neuron++) {
-                var teachingNeuron = new Teaching();
-                teachingNeuron.init(net.network[layer][neuron]);
+                var teachingNeuron = new Teaching(net.network[layer][neuron]);
 
                 for (var i=0;i<teachingNeuron.numberOfIterations;i++) {
                     var expectation = 0;
@@ -43,12 +40,15 @@ require(['underscore', 'neuron/neuron', 'neuron/network', 'neuron/teaching'], fu
         }
         
         //Потестируем сеть
+        var error = 0;
+        var numberOfOptions = 5;
         
-        
-        
-        for (var i=0; i < 5; i++) { 
+        for (var i=0; i < numberOfOptions; i++) { 
         	
         var activate = false;
+        
+        
+        
         var inputs = [];
         
         switch (i) {
@@ -74,16 +74,30 @@ require(['underscore', 'neuron/neuron', 'neuron/network', 'neuron/teaching'], fu
         
         for (var layer = 0; layer < net.numberOfLayers; layer++) {
             for (var neuron = 0; neuron < net.numberOfNeurons; neuron++) {
-	           
-	            net.network[layer][neuron].setInputs(inputs);
-	            activate = net.network[layer][neuron].activate();
 				
-				console.log('Слой %d Нейрон %d ответил - %s',layer,neuron,activate);
+				var info = '';
+					           
+	            net.network[layer][neuron].setInputs(inputs);
 	            
+	            activate = net.network[layer][neuron].activate();
+	            
+	            if (neuron === i && activate === true) {
+					info = '- верно';
+				} else if (neuron !== i && activate === true || neuron === i && activate !== true) {
+	            	info = '- ОШИБКА!';
+	            	error ++;
 	            }
+				
+				console.log('Слой %d Нейрон %d ответил - %s %s',layer,neuron,activate,info);
+				
             }
-            
+     		}       
         }
+        
+        var error_percent = error/(net.numberOfLayers*net.numberOfNeurons*numberOfOptions)*100;
+        
+        console.error("Сеть ошиблась - %i раз",error);
+        console.error("Процент ошибок в сети - %s %",error_percent);
         
     })();
 });

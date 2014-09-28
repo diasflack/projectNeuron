@@ -1,11 +1,13 @@
-define(['underscore'], function(_) {
+define(['underscore'], function(_) {"use strict";
     //Класс Нейрона
-    function Neuron() {
-        this.numberOfInputs = 4; //Количество входов
-        this.threshold = 0.5; //порог активации от 0 до 1
+    function Neuron(inputs, weights) {
+        this.numberOfInputs = 0; //Количество входов
+        this.threshold = 0.3; //порог активации от 0 до 1
 
         this.inputs = new Array(this.numberOfInputs); // Сюда подаем входы
         this.weights = new Array(this.numberOfInputs); // Здесь храним веса
+        
+        this.init(inputs, weights);
     }
 
     Neuron.prototype.setInputs = function(inputs) {
@@ -37,6 +39,7 @@ define(['underscore'], function(_) {
     Neuron.prototype.init = function(inputs, weights) {
         this.inputs = inputs;
         this.weights = weights;
+        this.numberOfInputs = this.inputs.length;
     };
 
     return Neuron;

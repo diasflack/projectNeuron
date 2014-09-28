@@ -1,8 +1,10 @@
-define(['underscore'], function(_) {
+define(['underscore'], function(_) {"use strict";
     //Класс Программы обучения
-    function Teaching() {
+    function Teaching(neuron) {
         this.numberOfIterations = 200;//Количество итераций обучения
         this.learningRate = 0.3; //Константа скорости обучения - от 0 до 1
+        
+        this.init(neuron);
     }
 
     //Инициализация обучения. Передаем программе нейрон
@@ -31,8 +33,8 @@ define(['underscore'], function(_) {
     Teaching.prototype.teachingMethodDelta = function(expected) {
         var _self = this;
         return _.map(_self.neuron.weights, function(weight, i){
-        	//debugger;
             return weight + (_self.learningRate)*(expected-_self.neuron.activate())*(_self.neuron.inputs[i]);
+            debugger;
         });
     };
 
