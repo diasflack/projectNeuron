@@ -18,7 +18,9 @@ require(['underscore', 'neuron/neuron', 'neuron/network', 'neuron/teaching'], fu
 
                 for (var i=0;i<teachingNeuron.numberOfIterations;i++) {
                     var expectation = 0;
-                    new_inputs = _.map(inputs, function(input){return Math.round(Math.random())});
+                    new_inputs = _.map(inputs, function(input) {
+                        return Math.round(Math.random())
+                    });
                     
                     teachingNeuron.neuron.setInputs(new_inputs);
 
@@ -30,9 +32,7 @@ require(['underscore', 'neuron/neuron', 'neuron/network', 'neuron/teaching'], fu
 					
 					teachingNeuron.neuron.weights = teachingNeuron.teachingMethodDelta(expectation);
 
-                } 
-                
-                net.network[layer][neuron] = teachingNeuron.returnNeuron();
+                }
                 
                 console.log("Окончательные веса Нейрона " + neuron + " - " + net.network[layer][neuron].weights);
                 
