@@ -1,55 +1,76 @@
-require(['jquery', 'underscore', 'neuron/neuron2'], function($, _, Neuron) {
-    var one = _.flatten(
-        [ // 1
-            [0, 0, 1],
-            [0, 0, 1],
-            [0, 0, 1],
-            [0, 0, 1],
-            [0, 0, 1]
-        ]
-    );
-    var inputs = one.length;
+require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network', 'test/figures'], function($, _, Neuron, Network, figures) {
+    figures = _.map(figures, _.flatten);
+    var length = figures[0].length;
 
-    function getRandomMap(rounded, exclude)
+    function getRandomMap(rounded, excludes)
     {
+        excludes = excludes || figures;
         do {
             var res = [];
-            for (var i = 0 ; i < inputs ; i++) {
+            for (var i = 0 ; i < length ; i++) {
                 res[i] = rounded ? Math.round(Math.random()) : Math.random();
             }
-        } while (_.isEqual(res, exclude));
+
+            var isFigure = _.reduce(figures, function(acc, figure) {
+                return acc || _.isEqual(res, figure);
+            }, false);
+        } while (isFigure);
         return res;
     }
 
-    var neuron = new Neuron(inputs);
-    var learningRate = 0.01;
-    // учим нейрон отличать 1 от всего остального.
-    for (var i = 0 ; i < 20000 ; i++) {
-        var map = getRandomMap(true, one);
-        if (neuron.evaluate(map)) {
-            // Если выход неправильный и равен единице, то вычесть каждый вход из соответствующего ему веса.
-            _.each(neuron.weights, function(value, index) {
-                this.weights[index] = value - learningRate * map[index];
-            }, neuron);
-        }
-
-        if (!neuron.evaluate(one)) {
-            // Если выход неправильный и равен нулю, то добавить все входы к соответствующим им весам
-            _.each(neuron.weights, function(value, index) {
-                this.weights[index] = value + learningRate * one[index];
-            }, neuron);
-        }
+    function createNeuron()
+    {
+        return new Neuron(length);
     }
 
-    console.log(neuron.weights);
-
-    test('test neuron recognize 1', function() {
-        // test 10 not '1' figures
-        for (var i = 0 ; i < 10 ; i++) {
-            ok(!neuron.evaluate(getRandomMap(true, one)));
+    function createArray(length, index)
+    {
+        var res = new Array(length);
+        for (var i = 0 ; i < length ; i++) {
+            res[i] = 0;
         }
 
-        // test neuron recognize image '1'
-        ok(neuron.evaluate(one));
+        if (index !== undefined) {
+            res[index] = 1;
+        }
+        return res;
+    }
+
+    var network = new Network(1, 10, createNeuron);
+    var learningRate = 0.01;
+
+    _.map(figures, function(figure, i) {
+        var zeroes = createArray(10);
+        var expected = createArray(10, i);
+        // учим сеть отличать каждую цифру от всего остального.
+        for (var j = 0 ; j < 2000 ; j++) {
+            var map = getRandomMap(true);
+            if (!_.isEqual(network.evaluate(map), zeroes)) {
+                network.teach(map, zeroes, learningRate);
+            }
+
+            if (!_.isEqual(network.evaluate(figure), expected)) {
+                network.teach(map, expected, learningRate);
+            }
+        }
+    });
+
+    test('test neuron recognize figure', function() {
+        _.map(figures, function(figure, i) {
+            var actual;
+
+            var zeroes = createArray(10);
+            var expected = createArray(10, i);
+
+            // test 10 not '1' figures
+            for (var j = 0 ; j < 100 ; j++) {
+                actual = network.evaluate(getRandomMap(true));
+                ok(_.isEqual(zeroes, actual));
+            }
+
+            // test neuron recognize figure
+            actual = network.evaluate(figure);
+            ok(_.isEqual(expected, actual));
+        });
     });
 });

@@ -1,26 +1,46 @@
 define(['neuron/neuron'], function(Neuron) {"use strict";
-    //Класс Нейрона
-    function Network(inputs, weights) {
-        this.network = []; //Массив нейронов
-        this.numberOfNeurons = 5; //Количество нейронов в слое
-        this.numberOfLayers = 1; //Количество слоев
-        
-        this.createNetwork(inputs, weights);
+    function Network(width, height, neuronFactory) {
+        neuronFactory = neuronFactory || function() {
+            return new Neuron(height);
+        };
+        this.createNetwork(width, height, neuronFactory);
     }
 
-
-    //Прочитать сеть
-    Network.prototype.readNetwork = function() {
-        return this.network;
+    //Заполнение сети нейронами
+    Network.prototype.createNetwork = function(width, height, neuronFactory) {
+        this.network = []; // Матрица нейронов
+        for (var x = 0; x < width; x++) {
+            this.network[x] = [];
+            for (var y = 0; y < height; y++) {
+                this.network[x][y] = neuronFactory(x, y);
+            }
+        }
     };
 
-    //Заполнение сети нейронами
-    Network.prototype.createNetwork = function(inputs, weights) {
-        for (var layer = 0; layer < this.numberOfLayers; layer++) {
-            this.network[layer] = [];
-            for (var neuron = 0; neuron < this.numberOfNeurons; neuron++) {
-                this.network[layer][neuron] = new Neuron(inputs, weights);
-            }
+    Network.prototype._evaluateLayer = function(layer, inputs)
+    {
+        var outputs = [];
+        for (var y in layer) {
+            outputs[y] = layer[y].evaluate(inputs);
+        }
+        return outputs;
+    };
+
+    Network.prototype.evaluate = function(sinapses)
+    {
+        for (var x in this.network) {
+            sinapses = this._evaluateLayer(this.network[x], sinapses);
+        }
+        return sinapses;
+    };
+
+    /**
+     * Teach only first layer for now.
+     */
+    Network.prototype.teach = function(inputs, expected, learningRate)
+    {
+        for (var y in expected) {
+            this.network[0][y].teach(inputs, expected[y], learningRate);
         }
     };
 
