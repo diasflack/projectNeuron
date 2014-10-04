@@ -1,5 +1,6 @@
 define(['neuron/neuron'], function(Neuron) {"use strict";
     function Network(width, height, neuronFactory) {
+        this.neurons = []; // Матрица нейронов
         neuronFactory = neuronFactory || function() {
             return new Neuron(height);
         };
@@ -8,11 +9,11 @@ define(['neuron/neuron'], function(Neuron) {"use strict";
 
     //Заполнение сети нейронами
     Network.prototype.createNetwork = function(width, height, neuronFactory) {
-        this.network = []; // Матрица нейронов
+        this.neurons = [];
         for (var x = 0; x < width; x++) {
-            this.network[x] = [];
+            this.neurons[x] = [];
             for (var y = 0; y < height; y++) {
-                this.network[x][y] = neuronFactory(x, y);
+                this.neurons[x][y] = neuronFactory(x, y);
             }
         }
     };
@@ -28,8 +29,8 @@ define(['neuron/neuron'], function(Neuron) {"use strict";
 
     Network.prototype.evaluate = function(sinapses)
     {
-        for (var x in this.network) {
-            sinapses = this._evaluateLayer(this.network[x], sinapses);
+        for (var x in this.neurons) {
+            sinapses = this._evaluateLayer(this.neurons[x], sinapses);
         }
         return sinapses;
     };
@@ -40,7 +41,7 @@ define(['neuron/neuron'], function(Neuron) {"use strict";
     Network.prototype.teach = function(inputs, expected, learningRate)
     {
         for (var y in expected) {
-            this.network[0][y].teach(inputs, expected[y], learningRate);
+            this.neurons[0][y].teach(inputs, expected[y], learningRate);
         }
     };
 
