@@ -19,7 +19,12 @@ define(['underscore'], function(_) {
         for (var i = 0 ; i < this.weights.length ; i++) {
             res += this.weights[i] * inputs[i];
         }
-        return sigmoid(res) > this.threshold ? 1 : 0;
+        return sigmoid(res);
+    }
+
+    Neuron.prototype.activate = function(inputs)
+    {
+        return this.evaluate(inputs) > this.threshold ? 1 : 0;
     };
 
     /**
@@ -28,7 +33,7 @@ define(['underscore'], function(_) {
     Neuron.prototype.teach = function(inputs, expected, learningRate)
     {
         learningRate = learningRate || 0.01;
-        var actual = this.evaluate(inputs);
+        var actual = this.activate(inputs);
 
         function delta(weight) {
             return weight + learningRate * (expected - actual) * weight;

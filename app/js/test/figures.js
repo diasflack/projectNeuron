@@ -117,11 +117,11 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
         // учим сеть отличать каждую цифру от всего остального.
         for (var j = 0 ; j < 2000 ; j++) {
             var map = getRandomMap(true);
-            if (!_.isEqual(network.evaluate(map), zeroes)) {
+            if (!_.isEqual(network.activate(map), zeroes)) {
                 network.teach(map, zeroes, learningRate);
             }
 
-            if (!_.isEqual(network.evaluate(figure), expected)) {
+            if (!_.isEqual(network.activate(figure), expected)) {
                 network.teach(map, expected, learningRate);
             }
         }
@@ -136,12 +136,12 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
 
             // test 10 not '1' figures
             for (var j = 0 ; j < 100 ; j++) {
-                actual = network.evaluate(getRandomMap(true));
+                actual = network.activate(getRandomMap(true));
                 ok(_.isEqual(zeroes, actual));
             }
 
             // test neuron recognize figure
-            actual = network.evaluate(figure);
+            actual = network.activate(figure);
             ok(_.isEqual(expected, actual));
         });
     });
