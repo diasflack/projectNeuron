@@ -1,5 +1,7 @@
 require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($, _, Neuron, Network) {
     
+    "strict"
+    
     var c = document.getElementById("visualizer");
     var ctx = c.getContext("2d");
     var cHeight = c.offsetHeight;
@@ -8,12 +10,19 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
     var color_on = "#00FF00"
     var color_off = "#FF0000"
     
-    //Входики
-    var input = [0,1,0,1,0];
-    var inputR = 20;
+    var inputs = [0,0,1,0,0];
+    var neuron = new Neuron(inputs.length, 0.9);
     
-    var inputPosX = 100;
-    var inputPosY = cWidth/input.length-50;
+    
+    //Начинаем занимательное рисование =)
+    
+    function drawNeuron() {
+    //Входики
+    
+    var inputsR = 20;
+    
+    var inputsPosX = 100;
+    var inputsPosY = cWidth/inputs.length-50;
     
     //Нейрончик
     var neuronWidth = 20;
@@ -22,17 +31,15 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
     var neuronPosX = (cWidth-neuronWidth)/2;
     var neuronPosY = (cHeight-neuronHeight)/2;
     
-    var neuron = new Neuron(input.length);
+    var active = neuron.activate(inputs);
+    console.log(neuron.weights);
     
-    console.log(neuron);
-    
-    //Начинаем занимательное рисование =)
-    
+    ctx.clearRect(0, 0, cWidth, cHeight);
     //сперва отрисовываем инпуты
-    _.each(input, function(el, i){
+    _.each(inputs, function(el, i){
 	   
 	   ctx.beginPath();
-	   ctx.arc(inputPosX,inputPosY,inputR,0,2*Math.PI);
+	   ctx.arc(inputsPosX,inputsPosY,inputsR,0,2*Math.PI);
 	   ctx.lineWidth = 1;
 	   ctx.stroke();
 	   
@@ -40,23 +47,61 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
 	   ctx.fill();
 	   
 	   //отрисовываем связь
-	   ctx.moveTo(inputPosX+inputR,inputPosY);
-	   ctx.lineTo(inputPosX+100,inputPosY);
+	   ctx.moveTo(inputsPosX+inputsR,inputsPosY);
+	   ctx.lineTo(inputsPosX+100,inputsPosY);
 	   ctx.lineTo(neuronPosX,neuronPosY+neuronHeight/2);
 	   ctx.lineWidth = neuron.weights[i]*10;
 	   ctx.stroke();
 	   
-	   inputPosY += cWidth/input.length;//меняем позицию
+	   inputsPosY += cWidth/inputs.length;//меняем позицию
     });
-   
 	
 	//тута зачаток нейрона
 	ctx.beginPath();
     ctx.rect(neuronPosX,neuronPosY,neuronWidth,neuronHeight);
-    ctx.fillStyle = color_off;
+    active === 1 ? ctx.fillStyle = color_on : ctx.fillStyle = color_off; //определяем включен ли инпут
     ctx.fill();
 	ctx.lineWidth = 2;
     ctx.strokeStyle = 'black';
     ctx.stroke();
+    
+    }
+    
+    function learn() {
+	   for (var x = 0, il = 5; x < il; x++) {
+            inputs[x] = Math.round(Math.random());
+        }
+	    
+	    neuron.teach(inputs); 
+    }
+    
+    function animate() {
+
+	    var timer = setInterval(function(){
+		    
+		    learn();
+		    drawNeuron();
+	        
+		    
+	    }, 100);
+	    
+	    function stopTimer() {
+		    clearInterval(timer);
+		    clearInterval(timer-1);
+	    }
+	    
+	    
+	    return stopTimer;
+	    
+    }
+    
+    $("#startLearning").click(function(){
+	    animate();
+    });
+    
+    $("#endLearning").click(function(){
+    	animate()();
+    });
+
     
 });

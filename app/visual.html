@@ -3,10 +3,18 @@
 <head>
 	<title>projectNeuron</title>
 	<meta charset="utf-8">
+	<style>
+		button {
+			vertical-align:top;
+		}
+	</style>
 </head>
 <body>
 	<canvas id="visualizer" width="600" height="600" style="border:1px solid #000;"></canvas>
 	
+	
+	<button id="startLearning">Начать обучение</button>
+	<button id="endLearning">Закончить обучение</button>
     <script src="/js/require-conf.js"></script>
     <script data-main="/js/visual/visual.js" src="/lib/require.js"></script>
 </body>

@@ -1,4 +1,6 @@
 define(['underscore'], function(_) {
+	
+	"strict"
     function sigmoid(x)
     {
         return 1 / (1 + Math.exp(-(x)));
@@ -33,12 +35,14 @@ define(['underscore'], function(_) {
     Neuron.prototype.teach = function(inputs, expected, learningRate)
     {
         learningRate = learningRate || 0.01;
+        expected = expected || 1;
         var actual = this.activate(inputs);
 
         function delta(weight) {
             return weight + learningRate * (expected - actual) * weight;
         }
         this.weights = _.map(this.weights, delta);
+       
     };
 
     return Neuron;
