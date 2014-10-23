@@ -32,16 +32,31 @@ define(['underscore'], function(_) {
     /**
      * Перераспределение весов по правилу Дельта
      */
-    Neuron.prototype.teach = function(inputs, expected, learningRate)
+    Neuron.prototype.teach = function(inputs, expected, normalize, learningRate)
     {
         learningRate = learningRate || 0.01;
-        expected = expected || 1;
+        expected === undefined ? expected = 1 : expected = expected;
+        normalize = normalize || false;
         var actual = this.activate(inputs);
-
-        function delta(weight) {
-            return weight + learningRate * (expected - actual) * weight;
+		
+		function delta(weight, i) {
+            return weight + learningRate * (expected - actual) * inputs[i];
         }
+        
         this.weights = _.map(this.weights, delta);
+        
+        function normalizeAll(weights) {
+	        
+	        var weight_sum = _.reduce(weights, function(memo,num){return memo+num*num}, 0);
+	        var normalizator = Math.sqrt(weight_sum);
+	        
+	        return _.map(weights, function(weight) { return weight/normalizator })
+	        
+        }
+		
+		if (normalize === true) {
+        	this.weights = normalizeAll(this.weights);	
+        } 
        
     };
 

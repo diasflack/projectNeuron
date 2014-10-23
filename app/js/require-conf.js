@@ -4,7 +4,7 @@ var require = {
         exports: '_'
     },
     paths: {
-        underscore: "/lib/underscore-min",
-        jquery: "/lib/jquery.min"
+        underscore: "../lib/underscore-min",
+        jquery: "../lib/jquery.min"
     }
 };
