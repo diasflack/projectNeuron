@@ -2,26 +2,33 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
     
     "strict"
     
-    var c = document.getElementById("visualizer");
-    var ctx = c.getContext("2d");
-    var cHeight = c.offsetHeight;
-    var cWidth = c.offsetWidth;
+    var canvas = document.getElementById("visualizer");
+    var ctx = canvas.getContext("2d");
+    var cHeight = canvas.offsetHeight;
+    var cWidth = canvas.offsetWidth;
     
     var color_on = "#00FF00"
     var color_off = "#FF0000"
     
-    var inputs = [0,0,1,0,0];
-    var neuron = new Neuron(inputs.length, 0.9);
+    var inputs = [0,0,0,0,0];
+    var pattern = [0,0,1,0,0];
     
     //Входики
     var inputsR = 20;
+    var patternR = 10;
     
     var inputsPosX = 100;
     var inputsPosY;
     
+    var patternPosX = 500;
+    var patternPosY = 300;
+    
+    var inputsPos = [];
+    var patternPos = [];
+    
     //Нейрончик
-    var neuronWidth = 20;
-    var neuronHeight = 20;
+    var neuronWidth = 30;
+    var neuronHeight = 30;
     
     var neuronPosX = (cWidth-neuronWidth)/2;
     var neuronPosY = (cHeight-neuronHeight)/2;
@@ -30,37 +37,69 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
     
     var iteration_speed = $("#iteration_speed").val();
     var learning_rate = $("#learning_rate").val();
+    var threshold = $("#threshold").val();
+    var normalize = $("#normalize").val();
+    
+    var neuron = new Neuron(inputs.length, threshold);
     
 	var timer = animate();
 
+	var inputLineWidth;
     //Начинаем занимательное рисование =)
     
     function drawNeuron() {
     
     	inputsPosY = cWidth/inputs.length-50;
+    	patternPosY = 300;
 	    
 	    var active = neuron.activate(inputs);
 	    
 	    ctx.clearRect(0, 0, cWidth, cHeight);
 	    //сперва отрисовываем инпуты
 	    _.each(inputs, function(el, i){
+	    
+	       //создаем массив позиций нейронов
+	       inputsPos[i] = { x:inputsPosX, y:inputsPosY }
 		   
+		   //рисуем вход
 		   ctx.beginPath();
-		   ctx.arc(inputsPosX,inputsPosY,inputsR,0,2*Math.PI);
+		   ctx.arc(inputsPos[i].x,inputsPos[i].y,inputsR,0,2*Math.PI);
+		   ctx.lineWidth = 1;
+		   ctx.stroke();
+		   
+		   el === 1 ? ctx.fillStyle = color_on : ctx.fillStyle = color_off; //определяем включен ли инпут
+		   ctx.fill();
+		   ctx.stroke();
+		   
+		   //отрисовываем связь
+		   ctx.moveTo(inputsPos[i].x+inputsR,inputsPos[i].y);
+		   ctx.lineTo(inputsPos[i].x+100,inputsPos[i].y);
+		   ctx.lineTo(neuronPosX,neuronPosY+neuronHeight/2);
+		   
+		   neuron.weights[i] > 0 ? inputLineWidth = neuron.weights[i]/learning_rate : inputLineWidth = 0.000000000001;
+		   
+		   ctx.lineWidth = inputLineWidth;
+		   ctx.stroke();
+		   
+		   inputsPosY += cWidth/inputs.length;//меняем позицию
+	    });
+	    
+	    _.each(pattern, function(el, i){
+	    
+	       //создаем массив позиций нейронов
+	       patternPos[i] = { x:patternPosX, y:patternPosY }
+		   
+		   //рисуем вход
+		   ctx.beginPath();
+		   ctx.arc(patternPos[i].x,patternPos[i].y,patternR,0,2*Math.PI);
 		   ctx.lineWidth = 1;
 		   ctx.stroke();
 		   
 		   el === 1 ? ctx.fillStyle = color_on : ctx.fillStyle = color_off; //определяем включен ли инпут
 		   ctx.fill();
 		   
-		   //отрисовываем связь
-		   ctx.moveTo(inputsPosX+inputsR,inputsPosY);
-		   ctx.lineTo(inputsPosX+100,inputsPosY);
-		   ctx.lineTo(neuronPosX,neuronPosY+neuronHeight/2);
-		   ctx.lineWidth = neuron.weights[i]*10;
-		   ctx.stroke();
 		   
-		   inputsPosY += cWidth/inputs.length;//меняем позицию
+		   patternPosY += cWidth/2/pattern.length;//меняем позицию
 	    });
 		
 		//тута зачаток нейрона
@@ -79,11 +118,12 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
 	    ctx.fillText('Веса:',380,40);
 	    
 	    _.each(neuron.weights, function(el, i) {
-	    	//console.log(el);
-	    	ctx.fillText(+i+' - '+el.toFixed(6),430,60+20*i);
+	    	ctx.fillText(+i+': '+el.toFixed(6),430,60+20*i);
 	    });
 	    
-	    iterate_number++;
+	    ctx.fillText('Сигмоид:'+neuron.evaluate(inputs),380,180);
+	    
+	    ctx.fillText('Шаблон:',430,260);
     
     }
     
@@ -92,14 +132,15 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
             inputs[x] = Math.round(Math.random());
         }
 	    
-	    if (_.isEqual(inputs, [0,0,1,0,0])) {
-		    neuron.teach(inputs, 1, true, learning_rate); 
+	    if (_.isEqual(inputs, pattern)) {
+		    neuron.teach(inputs, 1, normalize, learning_rate); 
 	    } else {
-		    neuron.teach(inputs, 0, true, learning_rate); 
+		    neuron.teach(inputs, 0, normalize, learning_rate); 
 	    }
 	    
+	    iterate_number++;
+	    
     }
-    
     
     //Анимашечки!!!
     function animate() {
@@ -131,12 +172,88 @@ require(['jquery', 'underscore', 'neuron/neuron', 'neuron/network'], function($,
 	    
     }
     
+    /*
+     * Фишечки с мышкой
+     */
+    function writeMessage(message) {
+        ctx.clearRect(0, 0, 290, 30);
+        ctx.font = '18pt Calibri';
+        ctx.fillStyle = 'black';
+        ctx.fillText(message, 10, 25);
+      }
+      
+      function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
+      
+      function inputClick(evt) {
+	     var mPos = getMousePos(canvas, evt);
+	     
+	     _.each(inputsPos, function(el,i){
+		     
+		     if ((mPos.x - el.x)*(mPos.x - el.x) + (mPos.y - el.y)*(mPos.y - el.y) <= inputsR*inputsR) {
+			  	inputs[i] = +!inputs[i];
+			  	drawNeuron();
+		     }
+		     		     
+	     });
+	     
+	      _.each(patternPos, function(el,i){
+		     
+		     if ((mPos.x - el.x)*(mPos.x - el.x) + (mPos.y - el.y)*(mPos.y - el.y) <= patternR*patternR) {
+			  	pattern[i] = +!pattern[i];
+			  	drawNeuron();
+		     }
+		     		     
+	     });
+      }
+      
+      
+      canvas.addEventListener('mousemove', function(evt) {
+        var mousePos = getMousePos(canvas, evt);
+        var message = 'Mouse position: ' + mousePos.x + ',' + mousePos.y;
+        writeMessage(message);
+      }, false);
+      
+      canvas.addEventListener('click', inputClick, false);
+    
+    
+    /*
+     * Коммандный пункт
+     */
+    
     $("#startLearning").click(function(){
     	timer() ? $(this).text('Закончить обучение') : $(this).text('Начать обучение');
     });
     
+    $("#resetWeights").click(function(){
+    	neuron = new Neuron(inputs.length, threshold);
+    	drawNeuron();
+    });
+    
     $("#iteration_speed").on("change",function(){
 	    iteration_speed = $(this).val();
+	    timer();timer();
+    });
+    
+    $("#learning_rate").on("change",function(){
+	    learning_rate = $(this).val();
+	    timer();timer();
+    });
+    
+    $("#threshold").on("change",function(){
+    	threshold = $(this).val();
+	    neuron.threshold = $(this).val();
+	    timer();timer();
+    });
+    
+    $("#normalize").on("change",function(){
+    	$(this).is(':checked') ? normalize = true : normalize = false;
+    	timer();timer();
     });
     
     drawNeuron();

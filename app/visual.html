@@ -17,10 +17,13 @@
 	
 	<div id="command">
 		<label> Задержка прокрутки - <input id="iteration_speed" type="number" min="1" value="100"/> </label><br>
-		<label> Коэффициент скорости обучения - <input id="learning_rate" type="number" max="1" min="0" step="0.01" value="0.01"/> </label><br>
+		<label> Коэффициент скорости обучения - <input id="learning_rate" type="number" max="1" min="0" step="0.01" value="0.1"/> </label><br>
+		<label> Порог активации нейрона - <input id="threshold" type="number" max="1" min="0" step="0.1" value="0.8"/> </label><br>
+		<label> Нормирование - <input id="normalize" type="checkbox" value="false"/> </label><br>
 		
 		<br>
 		<button id="startLearning">Начать обучение</button>
+		<button id="resetWeights">Сбросить веса</button>
 	</div>
 	
     <script src="js/require-conf.js"></script>
